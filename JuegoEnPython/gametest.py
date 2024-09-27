@@ -1,7 +1,6 @@
 import pygame
 import random
 
-
 # Inicializar Pygame
 pygame.init()
 
@@ -15,6 +14,9 @@ RED = (255, 0, 0)
 BLUE = (0, 0, 255)
 GREEN = (0, 255, 0)
 BLACK = (0, 0, 0)
+
+# Fuentes
+font = pygame.font.SysFont("Arial", 40)
 
 # Clase Jugador
 class Player(pygame.sprite.Sprite):
@@ -138,6 +140,61 @@ class Enemy(pygame.sprite.Sprite):
         if self.health <= 0:
             self.kill()  # Elimina al enemigo cuando su salud llega a 0
 
+# Función para mostrar el menú principal
+def show_menu():
+    while True:
+        screen.fill(BLACK)
+
+        # Dibujar botones
+        start_button = pygame.Rect(300, 200, 200, 50)
+        controls_button = pygame.Rect(300, 300, 200, 50)
+
+        pygame.draw.rect(screen, WHITE, start_button)
+        pygame.draw.rect(screen, WHITE, controls_button)
+
+        # Dibujar texto
+        start_text = font.render("Start", True, BLACK)
+        controls_text = font.render("Controls", True, BLACK)
+
+        screen.blit(start_text, (start_button.x + 50, start_button.y + 10))
+        screen.blit(controls_text, (controls_button.x + 30, controls_button.y + 10))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if start_button.collidepoint(event.pos):
+                    return  # Iniciar el juego
+                if controls_button.collidepoint(event.pos):
+                    show_controls()  # Mostrar los controles
+
+# Función para mostrar los controles
+def show_controls():
+    controls_screen = True
+    while controls_screen:
+        screen.fill(BLACK)
+
+        # Mostrar texto de controles
+        controls_text = font.render("Use W/A/S/D to move", True, WHITE)
+        attack_text = font.render("Press SPACE to attack", True, WHITE)
+        magic_text = font.render("Press LSHIFT for magic", True, WHITE)
+
+        screen.blit(controls_text, (150, 200))
+        screen.blit(attack_text, (150, 250))
+        screen.blit(magic_text, (150, 300))
+
+        pygame.display.flip()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            if event.type == pygame.KEYDOWN:
+                controls_screen = False  # Salir de la pantalla de controles
+
 # Inicializar el juego
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Juego con Pygame y P.O.O")
@@ -157,7 +214,10 @@ for _ in range(5):
     all_sprites.add(enemy)
     enemies.add(enemy)
 
-# Bucle principal
+# Mostrar menú principal
+show_menu()
+
+# Bucle principal del juego
 running = True
 clock = pygame.time.Clock()
 
