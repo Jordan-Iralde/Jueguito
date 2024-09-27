@@ -181,8 +181,8 @@ while running:
         # Crear un área de ataque circular alrededor del jugador
         attack_area = pygame.Rect(player.rect.centerx - player.attack_radius, 
                                    player.rect.centery - player.attack_radius, 
-                                   player.attack_radius * 2, 
-                                   player.attack_radius * 2)
+                                   player.attack_radius * 3, 
+                                   player.attack_radius * 3)
 
         # Detectar colisiones con enemigos
         for enemy in enemies:
