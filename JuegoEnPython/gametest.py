@@ -134,11 +134,31 @@ class Enemy(pygame.sprite.Sprite):
                 self.image.fill(RED)  # Volver al color original
 
     def take_damage(self, damage):
+        global score  # Acceder a la variable de puntuación global
         self.health -= damage
         self.hit_timer = 20  # Temporizador para el efecto de daño
         self.image.fill(GREEN)  # Cambiar color al recibir daño
         if self.health <= 0:
             self.kill()  # Elimina al enemigo cuando su salud llega a 0
+            score += 10  # Incrementar la puntuación al eliminar al enemigo
+
+# Clase Door
+class Door(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface((50, 80))
+        self.image.fill(GREEN)
+        self.rect = self.image.get_rect()
+        self.rect.center = (SCREEN_WIDTH - 50, SCREEN_HEIGHT // 2)
+
+# Variables para los niveles y la puerta
+level = 1
+door = None
+
+def spawn_door():
+    global door
+    door = Door()
+    all_sprites.add(door)
 
 # Función para mostrar el menú principal
 def show_menu():
@@ -194,10 +214,12 @@ def show_controls():
                 quit()
             if event.type == pygame.KEYDOWN:
                 controls_screen = False  # Salir de la pantalla de controles
-
 # Inicializar el juego
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Juego con Pygame y P.O.O")
+
+# Mostrar menú principal
+show_menu()
 
 # Crear grupos de sprites
 all_sprites = pygame.sprite.Group()
@@ -214,8 +236,13 @@ for _ in range(5):
     all_sprites.add(enemy)
     enemies.add(enemy)
 
-# Mostrar menú principal
-show_menu()
+# Variable de puntuación
+score = 0
+
+# Función para mostrar la puntuación en pantalla
+def draw_score(screen):
+    score_text = font.render(f"Score: {score}", True, WHITE)
+    screen.blit(score_text, (SCREEN_WIDTH - 150, 20))
 
 # Bucle principal del juego
 running = True
@@ -259,14 +286,34 @@ while running:
         for projectile in projectiles_hit:
             enemy.take_damage(10) 
 
-    # Dibujar sprites
+    # Dibujar sprites y puntuación
     all_sprites.draw(screen)
-
     # Dibujar el área de ataque (opcional, para depuración)
     if attack_physical:
-        pygame.draw.circle(screen, GREEN, player.rect.center, player.attack_radius, 2)  
-
+        pygame.draw.circle(screen, GREEN, player.rect.center, player.attack_radius, 2)
+    draw_score(screen)
     player.draw_health_mana(screen)
+
+    def spawn_enemies(level):
+        for _ in range(5 + (level - 1) * 2):  # Más enemigos por nivel
+            enemy = Enemy()
+            all_sprites.add(enemy)
+            enemies.add(enemy)
+
+    def advance_level():
+        global level, door
+        level += 1
+        door.kill()  # Elimina la puerta
+        spawn_enemies(level)  # Aumenta la dificultad agregando más enemigos
+
+    # En el bucle principal del juego, después de derrotar a todos los enemigos:
+    if not enemies and not door:
+        spawn_door()  # Aparece la puerta cuando no quedan enemigos
+
+    # Detectar colisión entre el jugador y la puerta
+    if door and pygame.sprite.collide_rect(player, door):
+        advance_level()
     pygame.display.flip()
 
 pygame.quit()
+  
